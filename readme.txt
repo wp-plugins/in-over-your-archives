@@ -1,5 +1,5 @@
 === In Over Your Archives ===
-Contributors: stresslimitdesign
+Contributors: stresslimit, cvernon, batmoo
 Tags: inoveryourhead, julien smith, archives, archive, posts, jquery
 Requires at least: 2.8
 Stable tag: 1.0
