@@ -1,13 +1,13 @@
 <?php
 /*
 Plugin Name: In Over Your Archives
-Plugin URI: http://stresslimitdesign.net/inoveryourarchives.html
+Plugin URI: http://wordpress.org/extend/plugins/in-over-your-archives/
 Description: This plugin will display your archive page in a nice way, just like on inoveryourhead.net
-Version: 1.0
+Version: 1.0.1
 Author: stresslimit
-Author URI: http://www.stresslimitdesign.com
+Author URI: http://stresslimitdesign.com
 
-Copyright 2010 stresslimit (www.stresslimitdesign.com)
+Copyright 2010 stresslimit (http://stresslimitdesign.com)
 
 */
 
@@ -16,7 +16,8 @@ Copyright 2010 stresslimit (www.stresslimitdesign.com)
 	SETUP AND DO THE STUFF
 	-------------------------------------------------------------*/
 
-define( 'IOYA_PLUGIN_URL', path_join( WP_PLUGIN_URL, basename( dirname( __FILE__ ) ).'' ) );
+// define( 'IOYA_PLUGIN_URL', path_join( WP_PLUGIN_URL, basename( dirname( __FILE__ ) ).'' ) );
+define( 'IOYA_PLUGIN_URL', '/wp-content/plugins/in-over-your-archives/' );
 define( 'IOYA_PLUGIN_PATH', dirname( __FILE__ ) );
 define( 'IOYA_OPTIONS_KEY', 'ioya_' );
 define( 'IOYA_THUMBNAIL_FIELD', 'inoveryourthumb' );
@@ -94,7 +95,8 @@ function ioya_admin_init(){
 	 *   - you can fetch option values using ioya_get_option( $slug ) where $slug is the name you entered in the array below
 	 */
 	$ioya_options = array(
-		'colours'
+		'colours',
+		'escapes'
 	);
 	
 	// "Register" the setting so WordPress knows about it
@@ -142,6 +144,16 @@ function ioya_options() {
 				?>
 			</table>
 
+			<h3><?php _e('Advanced', 'ioya') ?></h3>
+			
+			<p><?php _e('Here you have some other advanced options.', 'ioya') ?></p>
+			
+			<table class="form-table">				
+				<?php 
+				ioya_options_text_field( __('Images to Ignore', 'ioya'), 'escapes', __('Enter the names of small or unimportant images that we should ignore, separated by commas.<br/>These are regular expressions so you can use a filename, a domain, or a keyword.', 'ioya') );
+				?>
+			</table>
+
 			<p class="submit">
 				<input type="submit" class="button-primary" value="<?php _e('Save Changes', 'ioya') ?>" />
 			</p>
@@ -151,7 +163,7 @@ function ioya_options() {
 }
 
 // Spits out a text field
-function ioya_options_text_field ( $name, $slug, $description = '', $default_value = '') {
+function ioya_options_text_field( $name, $slug, $description = '', $default_value = '') {
 		$option_name = ioya_get_option_name( $slug );
 		$option_value = ioya_get_option( $slug );
 		if( !$option_value )
@@ -173,7 +185,7 @@ function ioya_options_text_field ( $name, $slug, $description = '', $default_val
 }
 
 // Spits out a text field to allow users to pick a colour
-function ioya_options_colour_field ( $name, $slug, $description = '', $default_value = '') {
+function ioya_options_colour_field( $name, $slug, $description = '', $default_value = '') {
 		$option_name = ioya_get_option_name( 'colours' ) .'['. $slug .']';
 		$option_value = ioya_get_option( 'colours' );
 		$colour = ioya_get_colour($option_value[$slug], $default_value);
@@ -233,7 +245,6 @@ function ioya_get_option_name( $name ) {
 }
 
 function ioya_get_option( $name = '' ) {
-	
 	$option = get_option( ioya_get_option_name( $name ) );
 	return $option;
 }
@@ -511,7 +522,7 @@ function ioya_get_images( $posts, $num = 8, $size = 'medium' ) {
 
 		// If custom_meta image, display that
 		if( $custom_img ) {
-			$img_out = '<img title="'.$post->ID.'" src="'.$custom_img.'" width="44px" height="44px" alt="" />';
+			$img_out = '<img title="'.$post->ID.'" src="'.$custom_img.'" width="44" height="44" alt="'.$post->post_title.'" />';
 		} else if ( !empty($post_img) ) {
 			// Check if we're getting a custom size
 			if( is_array($size) ) {
@@ -520,7 +531,7 @@ function ioya_get_images( $posts, $num = 8, $size = 'medium' ) {
 			}
 			// Something went wrong with the resizing, so skip to the next one
 			if( !$post_img ) continue;
-			$img_out = '<img title="'.__('Permanent link to ', 'ioya') . $post->post_title.'" src="'.$post_img.'" width="44px" height="44px" alt="" />'."";
+			$img_out = '<img title="'.__('Permanent link to ', 'ioya') . $post->post_title.'" src="'.$post_img.'" width="44" height="44" alt="'.$post->post_title.'" />'."";
 		}
 		
 		if( $img_out ) {
@@ -627,19 +638,26 @@ function ioya_get_inline_img( $post ) {
 
 function ioya_is_valid_img( $img_src ) {
 	// don't want script to scrape the following images:
-	$escapes = array(
-		'/odeo\.com/',
-		'/subs_itunes/',
-		'/headernewlogo\.gif/',
-		'/godaddy\.jpg/',
-		'/feed-icon/'
-	);
+	$escapes = ioya_get_option('escapes');
+	$escapes = explode(',', $escapes);
+	$escapes = array_map('ioya_escapes_format', $escapes);
+	// $escapes = array(
+	// 	'/odeo\.com/',
+	// 	'/subs_itunes/',
+	// 	'/headernewlogo\.gif/',
+	// 	'/godaddy\.jpg/',
+	// 	'/feed-icon/'
+	// );
 	
 	// see if found image is one we don't want
 	foreach( $escapes as $v ) {
 		if( preg_match( $v, $img_src ) ) return false;
 	}
 	return true;
+}
+
+function ioya_escapes_format($e) {
+	return '/'.str_replace(array('/','.'),array('\/','\.'),trim($e)).'/';
 }
 
 function ioya_resize_img( $url, $path, $size ) {
@@ -670,4 +688,3 @@ function ioya_resize_img( $url, $path, $size ) {
 
 	return false;
 }
-?>

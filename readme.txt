@@ -2,7 +2,7 @@
 Contributors: stresslimit, cvernon, batmoo
 Tags: inoveryourhead, julien smith, archives, archive, posts, jquery
 Requires at least: 2.8
-Stable tag: 1.0
+Stable tag: 1.0.1
 
 This plugin will display your archive page in a nice way, just like on inoveryourhead.net
 
@@ -13,9 +13,9 @@ This plugin will display your archive page in a nice way, just like on inoveryou
 == Installation ==
 
 1. Extract the contents of the zip file into your `/wp-content/plugins/` directory
-1. Activate the plugin through the 'Plugins' menu in WordPress
-1. You can either create an archive page with a template that includes the code `<?php echo in_over_your_archives(); ?>`, or create a page with the shortcode `[ioya]`
-1. Enjoy!
+2. Activate the plugin through the 'Plugins' menu in WordPress
+3. You can either create an archive page with a template that includes the code `<?php echo in_over_your_archives(); ?>`, or create a page with the shortcode `[ioya]`
+4. Enjoy!
 
 == Other Notes ==
 
@@ -53,5 +53,19 @@ Then modify as necessary.
 = 1.0 =
 
 * Initial release
+
+= 1.0.1 =
+
+Various release-related bug fixes:
+
+* updated css to prevent months from displaying on multiple lines
+
+* added the ability to provide a list of images to ignore, if you use small "utility" images like itunes buttons, get by email, twitter, etc
+
+* improved the parsing function which finds images automatically
+
+* fixed a php bug where imagecreatefromstring() was being called on an empty string
+
+* fixed a css bug where month abbrviations were being split onto 2 lines
 
 == Frequently Asked Questions ==
