@@ -1,8 +1,8 @@
 === In Over Your Archives ===
 Contributors: stresslimit, cvernon, batmoo
 Tags: inoveryourhead, julien smith, archives, archive, posts, jquery
-Requires at least: 2.8
-Stable tag: 1.0.1
+Requires at least: 2.9.2
+Stable tag: 1.2
 
 This plugin will display your archive page in a nice way, just like on inoveryourhead.net
 
