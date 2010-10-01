@@ -14,7 +14,7 @@ This plugin will display your archive page in a nice way, just like on inoveryou
 
 1. Extract the contents of the zip file into your `/wp-content/plugins/` directory
 2. Activate the plugin through the 'Plugins' menu in WordPress
-3. You can either create an archive page with a template that includes the code `<?php echo in_over_your_archives(); ?>`, or create a page with the shortcode `[ioya]`
+3. You can either create an archive page with a template that includes the code `<?php echo ioya_archive(); ?>`, or create a page with the shortcode `[ioya]`
 4. Enjoy!
 
 == Other Notes ==
@@ -36,7 +36,7 @@ Add a file called `ioya_month.php` to your theme directory and add a basic loop 
         <h2><a href="<?php the_permalink() ?>" rel="bookmark" title="Permanent Link to <?php the_title_attribute(); ?>"><?php the_title(); ?></a></h2>
         <small>Posted by <?php the_author_link() ?> at <?php the_time('g:i A') ?></small>
         <div class="entry">
-        	<?php echo $paragraph[0]; ?>
+        	<?php the_excerpt(); ?>
         </div>
     </div>
 <?php endwhile; ?>
@@ -64,8 +64,18 @@ Various release-related bug fixes:
 
 * improved the parsing function which finds images automatically
 
-* fixed a php bug where imagecreatefromstring() was being called on an empty string
+* fixed a css bug where month abbreviations were being split onto 2 lines
 
-* fixed a css bug where month abbrviations were being split onto 2 lines
+= 1.2 =
+
+More bug fixes!
+
+* fixed a bug where imagecreatefromstring() in wp core was being called on empty string
+
+* fixed a bug where in certain cases we wouldn't get any thumbnails at all
+
+* better handling when we are in a month with no posts, so we jump to the month before
+
+* a bunch of small optimization stuff
 
 == Frequently Asked Questions ==
