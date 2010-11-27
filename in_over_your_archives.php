@@ -325,7 +325,8 @@ function ioya_update_year($current_year = false, $current_month = false, $ajax =
 
 	$month_has_posts = array();
 	$month_count = ($current_month) ? $current_month - 1 : 0;
-
+	$results_count = 0;
+	
 	foreach( $results as $month ) {
 		$month_has_posts[$month] = true;
 		$results_count++;
@@ -347,7 +348,7 @@ function ioya_update_year($current_year = false, $current_month = false, $ajax =
           <?php
           for($month = 12; $month >= 1; $month--) :
           $selected = ($current_month == $month) ? ' class="selected"' : '';
-          if($month_has_posts[$month]) : ?>
+          if( isset( $month_has_posts[$month] ) && $month_has_posts[$month] ) : ?>
           <li<?php echo $selected; ?>><a href="<?php echo get_month_link($current_year, $month) ?>" rel="<?php echo $current_year . ioya_format_month($month) ?>"><?php echo ioya_month_string($month); ?></a></li>
           <?php else : ?>
           <li<?php echo $selected; ?>><span rel="<?php echo $current_year . ioya_format_month($month) ?>"><?php echo ioya_month_string($month); ?></span></li>
