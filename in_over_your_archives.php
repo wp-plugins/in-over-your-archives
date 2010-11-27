@@ -51,8 +51,8 @@ ioya_options(): creates our admin page
 	SETUP AND DO THE STUFF
 	-------------------------------------------------------------*/
 
-// define( 'IOYA_PLUGIN_URL', path_join( WP_PLUGIN_URL, basename( dirname( __FILE__ ) ).'' ) );
-define( 'IOYA_PLUGIN_URL', '/wp-content/plugins/in-over-your-archives/' );
+define( 'IOYA_PLUGIN_URL', path_join( WP_PLUGIN_URL, basename( dirname( __FILE__ ) ).'' ) );
+//define( 'IOYA_PLUGIN_URL', '/wp-content/plugins/in-over-your-archives/' );
 define( 'IOYA_PLUGIN_PATH', dirname( __FILE__ ) );
 define( 'IOYA_OPTIONS_KEY', 'ioya_' );
 define( 'IOYA_THUMBNAIL_FIELD', 'inoveryourthumb' );
@@ -472,9 +472,9 @@ function ioya_ajax() {
 }
 
 function ioya_archive_ajax() {
-	$yr = intval( $_REQUEST["yr"] );
-	$mth = intval( $_REQUEST["mth"] );
-echo 'post'.$_POST["ioyh"];
+	$yr = isset( $_REQUEST["yr"] ) ? intval( $_REQUEST["yr"] ) : 0;
+	$mth = isset( $_REQUEST["mth"] ) ? intval( $_REQUEST["mth"] ) : 0;
+	
 	if ( $_POST["ioyh"] == 'y' )
 		ioya_update_year( $yr, $mth, true );
 	else if ( $_POST["ioyh"] == 'm' )
