@@ -72,6 +72,8 @@ add_action('init', 'ioya_ajax');
 
 // Replace the default archive page
 add_filter('archive_template', 'ioya_replacement');
+// Change the query vars if needed
+add_action('pre_get_posts', 'ioya_get_posts');
 
 // Register shortcode
 add_shortcode('ioya', 'ioya_shortcode');
@@ -79,11 +81,18 @@ add_shortcode('ioya', 'ioya_shortcode');
 function ioya_init( ) {	
 }
 
+// Switch template to IOYA
 function ioya_replacement() {
 	// Allow users to override the archive template
 	$template = locate_template( 'ioya_archive.php' );
 	if( !$template ) $template = IOYA_PLUGIN_PATH . '/ioya_archives.php';
 	return $template;
+}
+
+// Set posts per page to unlimited (we don't support paging just yet)
+function ioya_get_posts( $query ) {
+	if( is_archive() )
+		$query->query_vars['posts_per_page'] = -1;
 }
 
 // Add scripts to head on archive pages
