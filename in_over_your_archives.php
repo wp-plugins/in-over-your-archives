@@ -93,6 +93,7 @@ function ioya_replacement() {
 function ioya_get_posts( $query ) {
 	if( is_archive() )
 		$query->query_vars['posts_per_page'] = -1;
+		$query->query_vars['showposts'] = -1;
 }
 
 // Add scripts to head on archive pages
@@ -379,11 +380,21 @@ function ioya_update_month($current_year = false, $current_month = false) {
 		$current_month = ioya_get_queried_month();
 
 	// Grab a list of the posts for this month
-	$posts =  $wp_query->get_posts();
+	$posts =  $wp_query->get_posts( array(
+		'posts_per_page' => -1
+		, 'showposts' => -1
+		
+	) );
 
 	if( empty($posts) ) {
 		$current_month = ioya_get_recent_month_with_posts($current_year, $current_month);
-		$wp_query = new WP_Query("year=$current_year&monthnum=$current_month");
+		$wp_query = new WP_Query( array(
+			'year' => $current_year
+			, 'monthnum' => $current_month
+			, 'posts_per_page' => -1
+			, 'showposts' => -1
+			
+		) );
 		$posts =  $wp_query->get_posts();
 	}
 
@@ -414,7 +425,13 @@ function ioya_shortcode() {
 	$month = ioya_get_queried_month();
 	
 	// Create the new query
-	$wp_query = new WP_Query("year=$year&monthnum=$month");
+	$wp_query = new WP_Query( array(
+		'year' => $year
+		, 'monthnum' => $month
+		, 'posts_per_page' => -1
+		, 'showposts' => -1
+		
+	) );
 	
 	// Show the archive
 	ioya_archive($year, $month, true);
