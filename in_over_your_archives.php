@@ -623,6 +623,8 @@ function ioya_get_custom_img( $post_id ) {
 }
 
 function ioya_get_attached_img( $post_id, $size ) {
+	$attached_img_id = 0;
+
 	// Check for a post thumbnail first
 	if( function_exists('get_post_thumbnail_id') )
 		$attached_img_id = get_post_thumbnail_id($post_id);
