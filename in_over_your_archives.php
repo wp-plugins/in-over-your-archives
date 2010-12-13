@@ -83,10 +83,12 @@ function ioya_init( ) {
 
 // Switch template to IOYA
 function ioya_replacement() {
-	// Allow users to override the archive template
-	$template = locate_template( 'ioya_archive.php' );
-	if( !$template ) $template = IOYA_PLUGIN_PATH . '/ioya_archives.php';
-	return $template;
+	if( is_month() || is_year() ) {
+		// Allow users to override the archive template
+		$template = locate_template( 'ioya_archive.php' );
+		if( !$template ) $template = IOYA_PLUGIN_PATH . '/ioya_archives.php';
+		return $template;
+	}
 }
 
 // Set posts per page to unlimited (we don't support paging just yet)
@@ -468,7 +470,7 @@ function ioya_archive( $year = false, $month = false, $load_scripts = false ) {
 		<script type="text/javascript">
 			// Loads necessary scripts if needed
 			if( typeof(jQuery) === 'undefined' )
-				document.write('<scr'+'ipt type="text/javascript" src="<?php bloginfo('siteurl') ?>/wp-admin/load-scripts.php?c=1&load=jquery"></scr'+'ipt>');
+				document.write('<scr'+'ipt type="text/javascript" src="<?php echo admin_url( '/load-scripts.php?c=1&load=jquery' ); ?>"></scr'+'ipt>');
 			if( typeof(ioya_js_loaded) === 'undefined' )
 				document.write('<scr'+'ipt type="text/javascript" src="<?php echo IOYA_PLUGIN_URL . '/js/in_over_your_jquery.js' ?>"></scr'+'ipt>');
 		</script>
