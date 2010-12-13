@@ -48,7 +48,8 @@ Then modify as necessary.
 
 == Screenshots ==
 
-1. This is the color customization in the admin section
+1. The archive as implemented on inoveryourhead.net
+2. This is the color customization in the admin section
 
 == Changelog ==
 
