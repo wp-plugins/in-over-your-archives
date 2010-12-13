@@ -2,7 +2,7 @@
 Contributors: stresslimit, cvernon, batmoo
 Tags: inoveryourhead, julien smith, archives, archive, posts, jquery
 Requires at least: 2.9.2
-Stable tag: 1.3
+Stable tag: 1.3.1
 
 This plugin will display your archive page in a nice way, just like on <a href="http://inoveryourhead.net/archive">inoveryourhead.net</a>.
 
@@ -52,6 +52,10 @@ Then modify as necessary.
 2. This is the color customization in the admin section
 
 == Changelog ==
+
+= 1.3.1 =
+
+* Bug introduced in the previous update was loading all posts across all pages
 
 = 1.3 = 
 
