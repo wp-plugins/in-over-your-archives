@@ -51,6 +51,7 @@ ioya_options(): creates our admin page
 	SETUP AND DO THE STUFF
 	-------------------------------------------------------------*/
 
+define( 'IOYA_VERSION', '1.2' );
 define( 'IOYA_PLUGIN_URL', path_join( WP_PLUGIN_URL, basename( dirname( __FILE__ ) ).'' ) );
 //define( 'IOYA_PLUGIN_URL', '/wp-content/plugins/in-over-your-archives/' );
 define( 'IOYA_PLUGIN_PATH', dirname( __FILE__ ) );
@@ -101,14 +102,14 @@ function ioya_get_posts( $query ) {
 // Add scripts to head on archive pages
 function ioya_register_scripts() {
 	if ( is_archive() ) {
-		wp_enqueue_script('ioyh', IOYA_PLUGIN_URL . '/js/in_over_your_jquery.js', array('jquery'));
+		wp_enqueue_script('ioyh', IOYA_PLUGIN_URL . '/js/in_over_your_jquery.js', array('jquery'), IOYA_VERSION);
 		//wp_localize_script('ioyh', 'in_over_your_settings', array('year' => date('Y'), 'month' => date('m') ));
 	}
 }
 // Add CSS to head on archive pages
 function ioya_register_styles() {
 	if ( is_archive() ) {
-	   	wp_enqueue_style('ioya', IOYA_PLUGIN_URL . '/css/in_over_your_css.css', false, false, 'all');
+	   	wp_enqueue_style('ioya', IOYA_PLUGIN_URL . '/css/in_over_your_css.css', false, IOYA_VERSION, 'all');
 		ioya_the_custom_colours();
 	}
 }
@@ -118,8 +119,8 @@ function ioya_admin_scripts() {
 	global $pagenow, $plugin_page;
 	
 	if( is_admin() && ($pagenow == 'options-general.php' && $plugin_page == 'ioya') ) {
-		wp_enqueue_script('jquery-color-picker', IOYA_PLUGIN_URL . '/js/colorpicker.js', array('jquery'));
-		wp_enqueue_script('ioya-options', IOYA_PLUGIN_URL . '/js/ioya-options.js', array('jquery'));
+		wp_enqueue_script('jquery-color-picker', IOYA_PLUGIN_URL . '/js/colorpicker.js', array('jquery'), IOYA_VERSION);
+		wp_enqueue_script('ioya-options', IOYA_PLUGIN_URL . '/js/ioya-options.js', array('jquery'), IOYA_VERSION);
 		?>
 		<link href="<?php echo IOYA_PLUGIN_URL . '/css/colorpicker.css' ?>" rel="stylesheet" media="screen" />
 		<style type="text/css">
