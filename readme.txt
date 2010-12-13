@@ -50,32 +50,31 @@ Then modify as necessary.
 
 == Changelog ==
 
-= 1.0 =
+= 1.3 = 
 
-* Initial release
-
-= 1.0.1 =
-
-Various release-related bug fixes:
-
-* updated css to prevent months from displaying on multiple lines
-
-* added the ability to provide a list of images to ignore, if you use small "utility" images like itunes buttons, get by email, twitter, etc
-
-* improved the parsing function which finds images automatically
-
-* fixed a css bug where month abbreviations were being split onto 2 lines
+* Added filters so you can change the number and size of the image thumbnails displayed
+* Bug Fixes:
+** Various errors
+** Archive page now shows all posts; they were being limited to your site's posts per page count.
 
 = 1.2 =
 
-More bug fixes!
+* More bug fixes!
+** fixed a bug where imagecreatefromstring() in wp core was being called on empty string
+** fixed a bug where in certain cases we wouldn't get any thumbnails at all
+** better handling when we are in a month with no posts, so we jump to the month before
+** a bunch of small optimization stuff
 
-* fixed a bug where imagecreatefromstring() in wp core was being called on empty string
+= 1.0.1 =
 
-* fixed a bug where in certain cases we wouldn't get any thumbnails at all
+* Various release-related bug fixes:
+** updated css to prevent months from displaying on multiple lines
+** added the ability to provide a list of images to ignore, if you use small "utility" images like itunes buttons, get by email, twitter, etc
+** improved the parsing function which finds images automatically
+** fixed a css bug where month abbreviations were being split onto 2 lines
 
-* better handling when we are in a month with no posts, so we jump to the month before
+= 1.0 =
 
-* a bunch of small optimization stuff
+* Initial release
 
 == Frequently Asked Questions ==
