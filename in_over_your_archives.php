@@ -94,9 +94,10 @@ function ioya_replacement() {
 
 // Set posts per page to unlimited (we don't support paging just yet)
 function ioya_get_posts( $query ) {
-	if( is_archive() )
+	if( is_archive() && ( is_month() || is_year() ) ) {
 		$query->query_vars['posts_per_page'] = -1;
 		$query->query_vars['showposts'] = -1;
+	}
 }
 
 // Add scripts to head on archive pages
