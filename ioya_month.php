@@ -1,6 +1,6 @@
 
 <?php if(have_posts()) : ?>
-  <div class="imagethumbs"><?php ioya_the_images( $posts, 8, array(44, 44) ); ?></div>
+  <div class="imagethumbs"><?php ioya_the_images( $posts, apply_filters( 'ioya_image_count', 8 ), apply_filters( 'ioya_image_size', array(44, 44) ) ); ?></div>
 
 	<?php while (have_posts()) : the_post(); ?>
 		

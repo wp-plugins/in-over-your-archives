@@ -565,7 +565,7 @@ function ioya_get_images( $posts, $num = 8, $size = 'medium' ) {
 		$img_out = '';
 		$post_id = $post->ID;
 
-		// Yeah, I'm using an if-elseif-else block here; SUE ME!
+		// Yeah, I'm using an if-elseif-else block here...
 		if ( $custom_img = ioya_get_custom_img( $post_id ) ) {
 			// Image inside custom field
 		} else if ( $post_img = ioya_get_attached_img($post_id, $size) ) {
