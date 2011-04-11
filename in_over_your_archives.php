@@ -11,17 +11,17 @@ Copyright 2010 stresslimit (http://stresslimitdesign.com)
 
 */
 
-/*  --------------------------------------------------------------
+/*  -------------------------------------------------------------
 	EXPLAIN CALL STACK
 	-------------------------------------------------------------
-s
+
 wp action init:
 ioya_init(): empty for now
 
 Front end:
 
 possible entry points:
-* using the shortcode in a page [ioya_shortcode()], which gets the month&year from 
+* using the shortcode in a page [ioya], which gets the month&year from 
   either the getquerystring['m/y'] or php date("m/Y"), and passes to ioya_archive()
 * calling <?php ioya_archive(); ?> from either the default ioya_archives.php or in
   a theme archive.php page
@@ -51,9 +51,9 @@ ioya_options(): creates our admin page
 	SETUP AND DO THE STUFF
 	-------------------------------------------------------------*/
 
-define( 'IOYA_VERSION', '1.3.1' );
+define( 'IOYA_VERSION', '1.4' );
+//define( 'IOYA_PLUGIN_URL', path_join(plugins_url(), 'in-over-your-archives' ) );
 define( 'IOYA_PLUGIN_URL', path_join( WP_PLUGIN_URL, basename( dirname( __FILE__ ) ).'' ) );
-//define( 'IOYA_PLUGIN_URL', '/wp-content/plugins/in-over-your-archives/' );
 define( 'IOYA_PLUGIN_PATH', dirname( __FILE__ ) );
 define( 'IOYA_OPTIONS_KEY', 'ioya_' );
 define( 'IOYA_THUMBNAIL_FIELD', 'inoveryourthumb' );
@@ -64,6 +64,7 @@ add_action('init', 'ioya_init');
 // Admin setup
 add_action('admin_init', 'ioya_admin_init' );
 add_action('admin_menu', 'ioya_admin_menu');
+add_action('generate_rewrite_rules', 'ioya_rewrite_rules');
 
 // Setup scripts and catch ajax
 add_action('wp_print_scripts', 'ioya_register_scripts');
@@ -73,13 +74,15 @@ add_action('init', 'ioya_ajax');
 
 // Replace the default archive page
 add_filter('archive_template', 'ioya_replacement');
+
 // Change the query vars if needed
 add_action('pre_get_posts', 'ioya_get_posts');
 
 // Register shortcode
 add_shortcode('ioya', 'ioya_shortcode');
 
-function ioya_init( ) {	
+function ioya_init( ) {
+	
 }
 
 // Switch template to IOYA
@@ -153,6 +156,21 @@ function ioya_admin_init(){
 		$option_name = ioya_get_option_name( $option );
 		register_setting( IOYA_OPTIONS_KEY, $option_name );
 	}
+
+	// Flush cached rewrite rules so can generate our own and intercept calls which would potentially lead to 404 errors
+	flush_rewrite_rules();
+}
+
+// Generate rewrite rules
+function ioya_rewrite_rules( $wp_rewrite ) {
+	$new_rules = array( 
+		'ioya/(.+)' => 'index.php?m=' .
+			$wp_rewrite->preg_index(1).
+			$wp_rewrite->preg_index(2)
+	);	// uses this format: ...?m=201104
+
+	//​ Add the new rewrite rule into the top of the global rules array
+	$wp_rewrite->rules = $new_rules + $wp_rewrite->rules;
 }
 
 // Create our admin menu hook
@@ -302,7 +320,7 @@ function ioya_get_option( $name = '' ) {
 	TEMPLATE STUFF
 	-------------------------------------------------------------*/
 
-function ioya_update_year($current_year = false, $current_month = false, $ajax = false) {
+function ioya_update_year($current_year=false, $current_month=false, $cats=false, $ajax=false) {
 	global $wp_query, $wpdb;
 
 	if ( !$current_year )
@@ -337,44 +355,41 @@ function ioya_update_year($current_year = false, $current_month = false, $ajax =
 		$results_count++;
 	}
 
-  	?>
-    <div id="inoveryouryear_<?php echo esc_attr($current_year) ?>" class="inoveryouryear">
-        <ul>
-          <li class="date"><?php
-        	 if($prev_year_posts->have_posts()) :
-        	 ?><a href="<?php echo get_month_link($current_year - 1, ioya_format_month($current_month)); ?>" class="prevyear" rel="<?php echo ($current_year-1) . ioya_format_month($current_month) ?>">&lt;</a><?php
-        	 endif;
-        	 
-        	 if($next_year_posts->have_posts()) :
-        	 ?><a href="<?php echo get_month_link($current_year + 1, ioya_format_month($current_month)); ?>" class="nextyear" rel="<?php echo ($current_year+1) . ioya_format_month($current_month) ?>">&gt;</a><?php
-        	 endif;
-        	 ?><span><?php echo $current_year; ?></span></li>
-    			
-          <?php
-          for($month = 12; $month >= 1; $month--) :
-          $selected = ($current_month == $month) ? ' class="selected"' : '';
-          if( isset( $month_has_posts[$month] ) && $month_has_posts[$month] ) : ?>
-          <li<?php echo $selected; ?>><a href="<?php echo get_month_link($current_year, $month) ?>" rel="<?php echo $current_year . ioya_format_month($month) ?>"><?php echo ioya_month_string($month); ?></a></li>
-          <?php else : ?>
-          <li<?php echo $selected; ?>><span rel="<?php echo $current_year . ioya_format_month($month) ?>"><?php echo ioya_month_string($month); ?></span></li>
-          <?php endif; ?>
-          <?php endfor; ?>
+?>
+	<div id="inoveryouryear_<?php echo esc_attr($current_year) ?>" class="inoveryouryear">
+		<ul>
+			<li class="date">
+			<?php if($prev_year_posts->have_posts()) : ?>
+				<!-- <a href="<?php echo get_month_link($current_year - 1, ioya_format_month($current_month)); ?>" class="prevyear" rel="<?php echo ($current_year-1) . ioya_format_month($current_month) ?>">&lt;</a> -->
+				<a href="<? echo get_site_url() .'/ioya/'.($current_year - 1) .'/'. ioya_format_month($current_month) ?>" class="prevyear" rel="<?php echo ($current_year-1) . ioya_format_month($current_month) ?>">&lt;</a>
+			<?php endif; ?>
+			<?php if($next_year_posts->have_posts()) : ?>
+				<!-- <a href="<?php echo get_month_link($current_year + 1, ioya_format_month($current_month)); ?>" class="nextyear" rel="<?php echo ($current_year+1) . ioya_format_month($current_month) ?>">&gt;</a> -->
+				<a href="<? echo get_site_url() .'/ioya/'.($current_year + 1) .'/'. ioya_format_month($current_month) ?>" class="nextyear" rel="<?php echo ($current_year+1) . ioya_format_month($current_month) ?>">&gt;</a>
+			<?php endif; ?>
+				<span><?php echo $current_year; ?></span>
+			</li>
+
+<?php
+		for($month = 12; $month >= 1; $month--) :
+			$selected = ($current_month == $month) ? ' class="selected"' : '';
+			if( isset( $month_has_posts[$month] ) && $month_has_posts[$month] )
+				echo '<li'.$selected.'><a href="'.get_month_link($current_year, $month).'" rel="'.$current_year.ioya_format_month($month).'">'.ioya_month_string($month).'</a></li>';
+			else
+				echo '<li'.$selected.'><span>'.ioya_month_string($month).'</span></li>';
+		endfor;
+?>
         </ul>
-      </div>
+	</div>
 
 <?php if( !$ajax ) : ?>
-<script type="text/javascript">
-var in_over_your_settings = { year: <?php echo esc_js($current_year) ?>, month: <?php echo esc_js($current_month) ?> };
-</script>
-<?php endif; ?>
-<?php
+<script type="text/javascript">var in_over_your_settings = { year: <?php echo esc_js($current_year) ?>, month: <?php echo esc_js($current_month) ?> };</script>
+<?php endif;
+
 }
 
-function ioya_month_string($monthnum) {
-	return date("M",mktime(1,1,1,$monthnum));
-}
+function ioya_update_month($current_year=false, $current_month=false, $cats=false) {
 
-function ioya_update_month($current_year = false, $current_month = false) {
 	global $wp_query;
 
 	if ( !$current_year )
@@ -385,9 +400,9 @@ function ioya_update_month($current_year = false, $current_month = false) {
 
 	// Grab a list of the posts for this month
 	$posts =  $wp_query->get_posts( array(
-		'posts_per_page' => -1
-		, 'showposts' => -1
-		
+		'posts_per_page' => -1,
+		'cat' => $cats,
+		'showposts' => -1
 	) );
 
 	if( empty($posts) ) {
@@ -396,38 +411,40 @@ function ioya_update_month($current_year = false, $current_month = false) {
 			'year' => $current_year
 			, 'monthnum' => $current_month
 			, 'posts_per_page' => -1
-			, 'showposts' => -1
-			
+			, 'showposts' => -1			
 		) );
 		$posts =  $wp_query->get_posts();
 	}
 
 	// Allow users to add custom month template in their theme
 	$template = locate_template( 'ioya_month.php' );
-	?>
+?>
   	<div id="inoveryourmonth_<?php echo esc_attr($current_year) . esc_attr(ioya_format_month($current_month)); ?>" class="inoveryourpostswrapper inoveryourmonth">
-	<?php
+<?php
 		if( $template ) {
 			require_once( $template );
 		} else {
 			require_once( 'ioya_month.php' );
 		}
-	?>
+?>
   </div>
-	<?php
+<?php
 }
 
-function ioya_shortcode() {
+function ioya_shortcode($attr) {
 	global $wp_query;
-	
+
 	// This WP_Query bit is a bit of hack.
 	// Save a temp copy of the original query
 	$tmp_query = $wp_query;
-	
+
 	// Get the year and month vars
 	$year = ioya_get_queried_year();
 	$month = ioya_get_queried_month();
-	
+
+	// get category(ies) if user has supplied them
+	extract(shortcode_atts($attr));
+
 	// Create the new query
 	$wp_query = new WP_Query( array(
 		'year' => $year
@@ -436,12 +453,18 @@ function ioya_shortcode() {
 		, 'showposts' => -1
 		
 	) );
-	
+
 	// Show the archive
-	ioya_archive($year, $month, true);
-	
+	ioya_archive($year, $month, $attr, true);
+
 	// Revert back to the original query
 	$wp_query = $tmp_query;
+}
+
+function ioya_month_string($monthnum) {
+//	return date("M",mktime(1,1,1,$monthnum));	// i don't know why this doesn't work
+	$months = array('JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC');
+	return $months[--$monthnum];
 }
 
 /**
@@ -450,42 +473,46 @@ function ioya_shortcode() {
  * @param $month
  * @param $load_scripts is used for shortcode pages to load necessary CSS and JS
  */
-function ioya_archive( $year = false, $month = false, $load_scripts = false ) {
-	?>
-	
-	<?php if( $load_scripts ) : ?>
-		<?php // Yes, we know the stylesheet below breaks validation, but stop whining :P This is the best way to do it without loading the stylesheet across all pages. Plues, HTML5 is on our side anyway :) ?>
-		<link rel="stylesheet" type="text/css" href="<?php echo IOYA_PLUGIN_URL . '/css/in_over_your_css.css' ?>" media="screen" />
-		<?php ioya_the_custom_colours() ?>
-	<?php endif; ?>
+function ioya_archive( $year=false, $month=false, $cat=false, $load_scripts=false ) {
+
+	$cats = $cat['cat'];
+	// $cats = explode(',', $cat['cat']);
+
+	if( $load_scripts ) :
+		// Yes, we know the stylesheet below breaks validation, but stop whining :P This is the best way to do it without loading the stylesheet across all pages. Plus, HTML5 is on our side anyway :)
+		echo '<link rel="stylesheet" type="text/css" href="'.IOYA_PLUGIN_URL.'/css/in_over_your_css.css" media="screen" />';
+		ioya_the_custom_colours();
+	endif;
+
+?>
 
 	<div id="inoveryourarchives">
+		<?php if($cats) echo '<h3>Categories: '.$cats.'</h3>' ?>
     	<div id="inoveryouryears">
-    		<?php ioya_update_year($year, $month); ?>
+    		<?php ioya_update_year($year, $month, $cats); ?>
     	</div>
     	<div id="inoveryourmonths">
-    		<?php ioya_update_month($year, $month); ?>
+    		<?php ioya_update_month($year, $month, $cats); ?>
     	</div>
  	</div>
 
-	<?php if( $load_scripts ) : ?>
-		<script type="text/javascript">
-			// Loads necessary scripts if needed
-			if( typeof(jQuery) === 'undefined' )
-				document.write('<scr'+'ipt type="text/javascript" src="<?php echo admin_url( '/load-scripts.php?c=1&load=jquery' ); ?>"></scr'+'ipt>');
-			if( typeof(ioya_js_loaded) === 'undefined' )
-				document.write('<scr'+'ipt type="text/javascript" src="<?php echo IOYA_PLUGIN_URL . '/js/in_over_your_jquery.js' ?>"></scr'+'ipt>');
-		</script>
-	<?php endif; ?>
-	
-	<?php
+<?php if( $load_scripts ) : ?>
+	<script type="text/javascript">
+		// Loads necessary scripts if needed
+		if( typeof(jQuery) === 'undefined' )
+			document.write('<scr'+'ipt type="text/javascript" src="<?php echo admin_url( '/load-scripts.php?c=1&load=jquery' ); ?>"></scr'+'ipt>');
+		if( typeof(ioya_js_loaded) === 'undefined' )
+			document.write('<scr'+'ipt type="text/javascript" src="<?php echo IOYA_PLUGIN_URL . '/js/in_over_your_jquery.js' ?>"></scr'+'ipt>');
+	</script>
+<?php endif;
+
 }
 
 /*  --------------------------------------------------------------
 	HELPER FUNCTIONS
 	-------------------------------------------------------------*/
 
-/*  catch  ajax calls  */
+/*  catch ajax calls  */
 
 function ioya_ajax() {
 	if(isset( $_POST["ioyh"]))
@@ -493,14 +520,22 @@ function ioya_ajax() {
 }
 
 function ioya_archive_ajax() {
-	$yr = isset( $_REQUEST["yr"] ) ? intval( $_REQUEST["yr"] ) : 0;
-	$mth = isset( $_REQUEST["mth"] ) ? intval( $_REQUEST["mth"] ) : 0;
-	
-	if ( $_POST["ioyh"] == 'y' )
-		ioya_update_year( $yr, $mth, true );
-	else if ( $_POST["ioyh"] == 'm' )
-		ioya_update_month( $yr, $mth );
-	
+//	$yr = isset( $_REQUEST['yr'] ) ? intval( $_REQUEST["yr"] ) : 0;
+//	$mth = isset( $_REQUEST['mth'] ) ? intval( $_REQUEST["mth"] ) : 0;
+
+	$year = ioya_get_queried_year();
+	$month = ioya_get_queried_month();
+
+	$cat = isset($_POST['cat']) ? $_POST['cat'] : false;
+
+
+	if ( $_POST['ioyh'] == 'y' ) 
+		ioya_update_year( $year, $month, $cat, true );
+	else if ( $_POST['ioyh'] == 'm' )
+		ioya_update_month( $year, $month, $cat );
+	else 
+		return "Whoops, something is broken";
+
     exit();
 } 
 
