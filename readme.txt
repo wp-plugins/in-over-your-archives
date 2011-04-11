@@ -53,6 +53,11 @@ Then modify as necessary.
 
 == Changelog ==
 
+= 1.4 =
+
+* Mainly Javascript optimizations. 
+* Fixed a few bugs, including broken links to prev / next years
+
 = 1.3.1 =
 
 * Bug introduced in the previous update was loading all posts across all pages
