@@ -2,88 +2,72 @@ var ioya_js_loaded = true;
 
 ;(function($) {
 
-	jQuery(document).ready(function($) {
+	$(document).ready(function() {
 
 		var slider, $ioya_years_container, $ioya_months_container, year, month;
+		var cat = (in_over_your_settings['cat']) ? '&cat='+in_over_your_settings['cat'] : '';
 		
 		year	= parseInt(in_over_your_settings.year);
 		month	= parseInt(in_over_your_settings.month);
 		
-		$ioya_years_container = jQuery('#inoveryouryears');
-		$ioya_months_container = jQuery('#inoveryourmonths');
+		$ioya_years_container = $('#inoveryouryears');
+		$ioya_months_container = $('#inoveryourmonths');
 		
 		setUpSlider();
 		
-		jQuery('.inoveryouryear').data('loaded', true);
-		jQuery('.inoveryourmonth').data('loaded', true);
+		$('.inoveryouryear').data('loaded', true);
+		$('.inoveryourmonth').data('loaded', true);
 		
 		// Handle clicks from the calendar thingy
-		jQuery('#inoveryourarchives ul li a').live("click", function(){			// added .live() to bind to all current *and future* elements on the page
-			var $this = jQuery(this);
+		$('#inoveryouryears ul li a').live("click", function(){
 		
 			// Keep track of the year and month clicked. Year and month are stored in the link's rel attribute.
-			year = $this.attr('rel').substring(0, 4);
+			year = $(this).attr('rel').substring(0, 4);
 
-			if ( $this.parent().hasClass('date') ) {
+			if ( $(this).parent().hasClass('date') ) {
 				// We're calling a new year
-				return ioya_update_year( $this, year, month );
+				return ioya_update_year( $(this) );
 			} else { 
 				// We're calling a month
-				month = $this.attr('rel').substring(4, 6);
-				return ioya_update_month( $this, year, month );
+				month = $(this).attr('rel').substring(4, 6);
+				return ioya_update_month( $(this) );
 			}
 		});
 		
-		function ioya_update_year( $link, y, m ) {
+		function ioya_update_year( $link ) {
+
+			var $ioya_year = $('#inoveryouryear_'+ year );
 			
-			var $ioya_year = get_year_block( y );
-			
-			// Check to see if we've previously loaded the month; if so, just display it, otherwise make the AJAX call
+			// Check to see if we've previously loaded the year; if so, just display it, otherwise make the AJAX call
 			if ( $ioya_year.length && $ioya_year.data('loaded') == true ) {
-				animate_year($ioya_year, function() {
-					// Switch to correct month
-					$month_link = find_month_link($ioya_year, y, m);
-					m = month = $month_link.attr('rel').substring(4, 6); // update the global month var in case it's changed
-					return ioya_update_month( $month_link, y, m );
-				});
+				animate_year( $ioya_year );
 			} else {
-				jQuery.ajax({
-					type: "POST",
+				$.ajax({
+					type: 'POST',
 					url: $link.attr('href'),
-					data: "ioyh=y&yr="+y+"&mth="+m,
+					data: 'ioyh=y'+cat,
 					success: function(result){
-						var $result = jQuery(result);
+						var $result = $(result);
 						$result
 							.hide()
-							.css('opacity', 0)
-							.data('loaded', true) // indicates we've already loaded the year
-							.appendTo($ioya_years_container)
-							;
+							.fadeOut()
+							.data('loaded', true) // indicates we've now loaded the year
+							.appendTo($ioya_years_container);
 
-						animate_year( $result, function() {
-							var $month_link = find_month_link($result, y, m);
-							m = month = $month_link.attr('rel').substring(4, 6); // update the global month var in case it's changed
-							return ioya_update_month( $month_link, y, m );
-						});
+						animate_year( $result );
 					},
 					error: function(result, a) {
 						// archives with no posts sometimes through errors, so we need to catch those. Same routine as the success. Could be refactored.
-						var $result = jQuery(result.responseText);
+						var $result = $(result.responseText);
 						
 						if($result.hasClass('.inoveryouryear')) {
 							$result
 								.hide()
-								.css('opacity', 0)
+								.fadeOut()
 								.data('loaded', true) // indicates we've already loaded the year
-								.appendTo($ioya_years_container)
-								;
+								.appendTo($ioya_years_container);
 		
-							animate_year( $result, function() {
-								var $month_link = find_month_link($result, y, m);
-								m = month = $month_link.attr('rel').substring(4, 6); // update the global month var in case it's changed
-								return ioya_update_month( $month_link, y, m );
-							});
-
+							animate_year( $result );
 						}
 					}
 				});
@@ -91,69 +75,30 @@ var ioya_js_loaded = true;
 			return false;
 		}
 		
-		function find_month_link( $calendar, y, m ) {
-			// Switch to correct month
-			$month_link = $calendar.find('a[rel="'+ y + month_format(m) +'"]')
-			
-			// If month doesn't have any posts, find closest month with posts
-			if( !$month_link.length ) {
-				var month_num = parseInt(m);
-				var count = month_num - 1;
-				// Go down to Jan then up to Dec starting from current post
-				while( !$month_link.length ) {
-					if( count <= 0 ) count = month_num + 1;
-					if( count > 12 ) break;
-					
-					$month_link = $calendar.find('a[rel="'+ y + month_format(count) +'"]');
-					
-					if( count < month_num ) count--;
-					else count++;
-				}
-				// Still don't have month? Not sure why you wouldn't, but just in case, go the month but show no posts message
-				if( !$month_link.length )
-					$month_link = $calendar.find('span[rel="'+ year + month_format(m) +'"]');
-			}
-			return $month_link;
-		}
-		
-		function animate_year( $current, callback ) {
-			jQuery('.inoveryouryear').not($current).animate({opacity: 0}, 100, function() {
-				$current.stop().show().animate({ opacity: 1 }, 300, function() {
-					if( typeof (callback) !== 'undefined' ) callback();
-				});
-			});
-		}
-		
-		function ioya_update_month( $link, year, month ) {
+		function ioya_update_month( $link ) {
 			// Switch to the active month on the slider
 			$('#inoveryourarchives ul li').removeClass('selected');
 			
 			// Fade out all visible months
-			$('.inoveryourpostswrapper').fadeTo('fast', 0).hide();
-			
-			var $ioya_month = get_month_block(year, month);
-			
+			$('.inoveryourpostswrapper').fadeOut('fast').hide();
+
+			month = format_month(month);
+			var $ioya_month = $('#inoveryourmonth_'+ year + month);
+
 			// Check to see if we've previously loaded the month; if so, just display it, otherwise make the AJAX call
 			if ( $ioya_month.length && $ioya_month.data('loaded') == true ) {
-				$ioya_month.fadeTo('fast', 1).show();
+				$ioya_month.fadeIn('fast');
 			} else {
-				jQuery.ajax({
+				$.ajax({
 					type: "POST",
 					url: $link.attr('href'),	// can just pass the entire URL as it is correct
-					data: { ioyh: 'm', year: year, month: month },
+					data: 'ioyh=m'+cat,
 					success: function(result) {
-						var $result = jQuery(result);
+						var $result = $(result);
 						$result
-							.fadeTo('fast', 1)
-							.show()
+							.fadeIn('fast')
 							.data('loaded', true) // indicates we've already loaded the page
-							.appendTo($ioya_months_container)
-							;
-						
-						// remove grey hover, use grey slider as hover instead
-						$('#inoveryouryears ul li a').hover(function() {
-							$(this).css('background', 'transparent');
-						});
+							.appendTo($ioya_months_container);
 					}
 				});
 			}
@@ -163,19 +108,45 @@ var ioya_js_loaded = true;
 			moveSlider( newMonth );
 			return false;
 		}
-		
-		// Returns the year block if found, creates one if not
-		function get_year_block( year ) {
-			return jQuery('#inoveryouryear_'+ year);
+
+		function find_month_link( $calendar ) {
+			// Switch to correct month
+			$month_link = $calendar.find('a[rel="'+ year + format_month(month) +'"]')
+			
+			// If month doesn't have any posts, find closest month with posts
+			if( !$month_link.length ) {
+				var month_num = parseInt(month);
+				var count = month_num - 1;
+				// Go down to Jan then up to Dec starting from current post
+				while( !$month_link.length ) {
+					if( count <= 0 ) count = month_num + 1;
+					if( count > 12 ) break;
+					
+					$month_link = $calendar.find('a[rel="'+ year + format_month(count) +'"]');
+					
+					if( count < month_num ) count--;
+					else count++;
+				}
+				// Still don't have month? Not sure why you wouldn't, but just in case, go the month but show no posts message
+				if( !$month_link.length )
+					$month_link = $calendar.find('span:eq('+month+')');
+			}
+			return $month_link;
 		}
 		
-		// Returns the month block if found
-		function get_month_block( year, month ) {
-			month = month_format(month);
-			return jQuery('#inoveryourmonth_'+ year + month);
+		function animate_year( $current ) {
+			var year = $('.inoveryouryear').not($current);
+			year.fadeOut('fast', function() {
+				$(this).hide();
+				$current.fadeIn('fast');
+
+				var $month_link = find_month_link( $current );
+				month = $month_link.attr('rel').substring(4, 6); // update the global month var in case it's changed
+				ioya_update_month( $month_link );
+			});
 		}
 		
-		function month_format( m ) {
+		function format_month( m ) {
 			if( !isNaN(m) ) m = m.toString(); // .length doesn't work on numbers, so convert to string
 			if( m.length == 1 ) return '0' + m;
 			else return m;
@@ -184,31 +155,36 @@ var ioya_js_loaded = true;
 	/* ------------ Background Slider Animation ---------------- */
 
 		function setUpSlider() {
-			slider = jQuery('<div id="slider"></div>').appendTo('#inoveryourarchives').addClass('slider');		// our sliding thingy
-			slider.width( jQuery('#inoveryourarchives ul li.selected').width() 		);
-			slider.height( jQuery('#inoveryourarchives ul li.selected').height() 	);
+			slider = $('<div></div>').appendTo('#inoveryouryears').addClass('slider');		// our sliding thingy
+			slider.width( $('#inoveryouryears ul li.selected').width() );
+			slider.height( $('#inoveryouryears ul li.selected').height() );
 			
-			var pos = jQuery('#inoveryourarchives ul li.selected').position();
+			var pos = $('#inoveryouryears ul li.selected').position();
 			slider.css({'position':'absolute', 'top':pos.top+'px', 'left':pos.left+'px', 'z-index':1, 'display':'block', 'margin-left':'1px'}); // margin-left to match margin on li's
 			
 			// remove grey hover, use grey slider as hover instead
-			jQuery('#inoveryouryears ul li a').hover(function() {
+			$('#inoveryouryears ul li a').live('hover', function() {
 				$(this).css('background', 'transparent');
 			});
 			
-			jQuery('#inoveryourarchives ul li a').live('mouseover', function(){
-				if ( ! $(this).parent().hasClass('date') ) 	moveSlider( $(this).parent() );
-			}).live('mouseout', function(){
-				if ( ! $(this).parent().hasClass('date') ) 	moveSlider( $('#inoveryourarchives ul li.selected') );			
+			$('#inoveryouryears ul li a')
+				.live('mouseover', function(){ if ( ! $(this).parent().hasClass('date') ) moveSlider( $(this).parent() ); })
+				.live('mouseout', function(){ if ( ! $(this).parent().hasClass('date') ) moveSlider( $('#inoveryourarchives ul li.selected') ); });
+
+			// if jQuery > 1.4.1
+/*			$('#inoveryourarchives ul li a').live({
+				'mouseover' : function(){ if ( ! $(this).parent().hasClass('date') ) moveSlider( $(this).parent() );
+				'mouseout' : function(){ if ( ! $(this).parent().hasClass('date') ) moveSlider( $('#inoveryourarchives ul li.selected') );
 			});
+*/
 		}
 
-		function moveSlider(el) {
+		function moveSlider( el ) {
 			var vis = el.is(":visible");
 			
 			if ( !vis )
 				el.show();  // must be visible to get .position
-				
+
 			var pos = el.position(); // where it's going
 			
 			if ( !vis ) 
