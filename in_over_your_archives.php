@@ -52,8 +52,8 @@ ioya_options(): creates our admin page
 	-------------------------------------------------------------*/
 
 define( 'IOYA_VERSION', '1.4.1' );
-// define( 'IOYA_PLUGIN_URL', path_join(plugins_url(), 'in-over-your-archives' ) );
-define( 'IOYA_PLUGIN_URL', path_join( WP_PLUGIN_URL, basename( dirname( __FILE__ ) ).'' ) );
+define( 'IOYA_PLUGIN_URL', path_join(plugins_url(), 'in-over-your-archives' ) );
+// define( 'IOYA_PLUGIN_URL', path_join( WP_PLUGIN_URL, basename( dirname( __FILE__ ) ).'' ) );
 define( 'IOYA_PLUGIN_PATH', dirname( __FILE__ ) );
 define( 'IOYA_OPTIONS_KEY', 'ioya_' );
 define( 'IOYA_THUMBNAIL_FIELD', 'inoveryourthumb' );
@@ -169,7 +169,7 @@ function ioya_rewrite_rules( $wp_rewrite ) {
 			$wp_rewrite->preg_index(2)
 	);	// uses this format: ...?m=201104
 
-	//​ Add the new rewrite rule into the top of the global rules array
+	// Add the new rewrite rule into the top of the global rules array
 	$wp_rewrite->rules = $new_rules + $wp_rewrite->rules;
 }
 
@@ -321,7 +321,7 @@ function ioya_get_option( $name = '' ) {
 	-------------------------------------------------------------*/
 
 function ioya_update_year($current_year=false, $current_month=false, $cats=false, $ajax=false) {
-	global $wp_query, $wpdb;
+	global $wpdb;
 
 	if ( !$current_year )
 		$current_year = ioya_get_queried_year();
@@ -437,7 +437,14 @@ function ioya_update_month($current_year=false, $current_month=false, $cats=fals
 	);
 
 	// Grab a list of the posts for this month
-	$posts = query_posts( $args );
+
+
+
+// global $wp_query;
+// $posts = $wp_query->get_posts($args);
+
+$posts = query_posts( $args );
+
 
 	if( empty($posts) ) {
 		$current_month = ioya_get_recent_month_with_posts($current_year, $current_month, false, $cats);
@@ -464,6 +471,7 @@ function ioya_update_month($current_year=false, $current_month=false, $cats=fals
 ?>
 	</div>
 <?php
+	wp_reset_query();
 }
 
 function ioya_shortcode($attr) {
@@ -582,7 +590,7 @@ function ioya_get_queried_month() {
 	
 	if( $wp_query->query_vars['m'] )
 		return substr( $wp_query->query_vars['m'], 4, 6);
-	else if ( $wp_query->query_vars['monthnum'] ) 
+	else if ( $wp_query->query_vars['monthnum'] )
 		return $wp_query->query_vars['monthnum'];
 	else
 		return date('m');
