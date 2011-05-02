@@ -19,7 +19,7 @@ var ioya_js_loaded = true;
 		$('.inoveryourmonth').data('loaded', true);
 		
 		// Handle clicks from the calendar thingy
-		$('#inoveryourarchives ul li a').live("click", function(){
+		$('#inoveryouryears ul li a').live("click", function(){
 		
 			// Keep track of the year and month clicked. Year and month are stored in the link's rel attribute.
 			year = $(this).attr('rel').substring(0, 4);
