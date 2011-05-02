@@ -2,7 +2,7 @@
 Contributors: stresslimit, whatch, cvernon, batmoo
 Tags: inoveryourhead, julien smith, archives, archive, posts, jquery
 Requires at least: 2.9.2
-Stable tag: 1.4
+Stable tag: 1.4.1
 
 This plugin will display your archive page in a nice way, just like on <a href="http://inoveryourhead.net/archive">inoveryourhead.net</a>.
 
@@ -20,6 +20,17 @@ This plugin will display your archive page in a nice way, just like on inoveryou
 4. Enjoy!
 
 == Other Notes ==
+
+= Shortcode filtering =
+
+If you are using the In Over Your Archives shortcode [ioya] to embed the plugin on a page and would like to do category filtering on 
+your archive results, you may do so by providing the category slug(s) or ID(s), (or a mix) like so:
+
+`
+[ioya cat='trees']
+[ioya cat='03,45']
+[ioya cat='trees,45,trucks']
+`
 
 = Customizing the template =
 
@@ -49,14 +60,19 @@ Then modify as necessary.
 == Screenshots ==
 
 1. The archive as implemented on inoveryourhead.net
-2. This is the color customization in the admin section
+2. This is the colour customization in the admin section
 
 == Changelog ==
+
+= 1.4.1 =
+* implemented shortcode filtering by category.
+* various tweaks and performance improvements
 
 = 1.4 =
 
 * Mainly Javascript optimizations. 
-* Fixed a few bugs, including broken links to prev / next years
+* Fixed a few bugs:
+** broken links to prev / next years
 
 = 1.3.1 =
 

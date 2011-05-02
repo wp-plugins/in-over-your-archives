@@ -2,39 +2,31 @@
 
 	div#inoveryourarchives { position:relative; z-index:1; min-height:565px; }
 
-	div#inoveryourarchives ul { display:block; clear:both; height:28px; padding:0; margin:0; list-style-type:none; list-style-image:none; }
-	div#inoveryourarchives ul li { 
-		float:left;
-		width:30px; height:28px;
-		margin:0 2px 0 1px; padding:0;
-		font-family:Arial,Helvetica,sans-serif; font-size:11px; font-style:normal; font-weight:normal;
-		text-align:center; text-transform:uppercase; text-shadow:none;
-		vertical-align:baseline;
-	}
-	div#inoveryourarchives ul li:before { content:""; } /** Fix for Kubrick **/
-	div#inoveryourarchives ul li span { padding:12px 0 4px; height:12px; line-height:12px; display:block; }
-	div#inoveryourarchives ul li a { border:none; text-decoration:none; display:block; padding:12px 0 4px; height:12px; line-height:12px; font-weight:normal; font-size:11px; }
-	div#inoveryourarchives ul li a:hover { background:#bebebe; }
-
-	div#inoveryourarchives ul li.selected, 
-	div#inoveryourarchives ul li.selected a,
-	div#inoveryourarchives ul li.selected a:hover { }
-
-	div#inoveryourarchives ul li.date { font:14px Georgia,Times,serif; position:relative; padding-left:0; margin-left:0; margin-right:4px; width:40px; }
-	div#inoveryourarchives ul li.date a { }
-	div#inoveryourarchives ul li.date a:hover { color:#991518; background:transparent; }
-	div#inoveryourarchives ul li.date .prevyear { padding:0 2px; font-weight:bold; line-height:12px; position:absolute; top:0; left:0; }
-	div#inoveryourarchives ul li.date .nextyear { padding:0 2px; font-weight:bold; line-height:12px; position:absolute; top:0; right:0; }
-
 	div#inoveryourarchives div.imagethumbs { padding:6px 0 8px; }
 	div#inoveryourarchives div.imagethumbs img { padding-right:11px; }
 	div#inoveryourarchives div.imagethumbs a:hover { text-decoration: none; border: none; }
-
 	div#inoveryourarchives div.post { padding:8px 0; }
 	div#inoveryourarchives div.post h3 { padding:0 0 3px; }
 	
-	div#inoveryourarchives #inoveryourmonths { position: relative; }
-	div#inoveryourarchives #inoveryourmonths .post img { display:none; } /* for cases where images aren't getting pulled and are left in the archive post detail */	
-	div#inoveryourarchives #inoveryouryears { position:relative; display:block; height:35px; }
-	div#inoveryourarchives #inoveryouryears .inoveryouryear { position:absolute; z-index:2; top:0; left:0; }
+	div#inoveryouryears ul { display:block; clear:both; height:28px; padding:0; margin:0; list-style-type:none; list-style-image:none; }
+	div#inoveryouryears ul li { float:left; width:30px; height:28px; margin:0 2px 0 1px; padding:0; font-family:Arial,Helvetica,sans-serif; font-size:11px; font-style:normal; font-weight:normal; text-align:center; text-transform:uppercase; text-shadow:none; vertical-align:baseline; }
+	div#inoveryouryears ul li:before { content:""; } /** Fix for Kubrick **/
+	div#inoveryouryears ul li span { padding:12px 0 4px; height:12px; line-height:12px; display:block; }
+	div#inoveryouryears ul li a { border:none; text-decoration:none; display:block; padding:12px 0 4px; height:12px; line-height:12px; font-weight:normal; font-size:11px; }
+	div#inoveryouryears ul li a:hover { background:#bebebe; }
+
+	div#inoveryouryears ul li.selected, 
+	div#inoveryouryears ul li.selected a,
+	div#inoveryouryears ul li.selected a:hover { }
+
+	div#inoveryouryears ul li.date { font:14px Georgia,Times,serif; position:relative; padding-left:0; margin-left:0; margin-right:4px; width:40px; }
+	div#inoveryouryears ul li.date a { }
+	div#inoveryouryears ul li.date a:hover { color:#991518; background:transparent; }
+	div#inoveryouryears ul li.date .prevyear { padding:0 2px; font-weight:bold; line-height:12px; position:absolute; top:0; left:0; }
+	div#inoveryouryears ul li.date .nextyear { padding:0 2px; font-weight:bold; line-height:12px; position:absolute; top:0; right:0; }
+
+	div#inoveryourmonths { position: relative; }
+	div#inoveryourmonths .post img { display:none; } /* for cases where images aren't getting pulled and are left in the archive post detail */	
+	div#inoveryouryears { position:relative; display:block; height:35px; }
+	div#inoveryouryears .inoveryouryear { position:absolute; z-index:2; top:0; left:0; }
 	

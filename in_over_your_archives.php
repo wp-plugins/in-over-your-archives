@@ -51,8 +51,8 @@ ioya_options(): creates our admin page
 	SETUP AND DO THE STUFF
 	-------------------------------------------------------------*/
 
-define( 'IOYA_VERSION', '1.4' );
-//define( 'IOYA_PLUGIN_URL', path_join(plugins_url(), 'in-over-your-archives' ) );
+define( 'IOYA_VERSION', '1.4.1' );
+// define( 'IOYA_PLUGIN_URL', path_join(plugins_url(), 'in-over-your-archives' ) );
 define( 'IOYA_PLUGIN_URL', path_join( WP_PLUGIN_URL, basename( dirname( __FILE__ ) ).'' ) );
 define( 'IOYA_PLUGIN_PATH', dirname( __FILE__ ) );
 define( 'IOYA_OPTIONS_KEY', 'ioya_' );
@@ -330,21 +330,50 @@ function ioya_update_year($current_year=false, $current_month=false, $cats=false
 		$current_month = ioya_get_queried_month();
 
 	// Check if we have posts from the previous year
-	$prev_year_posts = new WP_Query(array('year' => ($current_year - 1)));
+	$prev_year_posts = new WP_Query(array(
+		'year' => ($current_year - 1),
+		'cat' => $cats
+	));
 
 	// Check if we have posts from next year
-	$next_year_posts = new WP_Query(array('year' => ($current_year + 1)));
+	$next_year_posts = new WP_Query(array(
+		'year' => ($current_year + 1),
+		'cat' => $cats
+	));
 
 	// Check to see which months for the current year have posts
 	// returns an ordered array of the month number, ie (1,2,4) = posts in jan, feb, apr
-	$results = $wpdb->get_col("SELECT month(post_date) as posts FROM {$wpdb->posts} WHERE post_type = 'post' and post_status = 'publish' and year(post_date) = $current_year GROUP BY month(post_date)");
+	if($cats) {
+		foreach (explode(',',$cats) as $cat) {
+			$query[] = "
+				( SELECT month(p.post_date) months
+				  FROM $wpdb->term_relationships AS tr
+				  INNER JOIN $wpdb->posts p
+				  INNER JOIN $wpdb->term_taxonomy AS tt ON tr.term_taxonomy_id = tt.term_taxonomy_id
+				  INNER JOIN $wpdb->terms AS t ON tt.term_id = t.term_id
+				  WHERE tt.taxonomy='category' AND t.term_id='{$cat}' and p.ID = tr.object_id
+				    AND p.post_type = 'post' and p.post_status = 'publish' and year(p.post_date) = $current_year 
+				    GROUP BY month(p.post_date)
+				)";
+		}
+		$query = "SELECT * from (".implode(' UNION ', $query).") as s ";
+	} else {
+		$query = "
+			SELECT month($wpdb->posts.post_date) as months_with_posts 
+			FROM {$wpdb->posts} 
+			WHERE $wpdb->posts.post_type = 'post' and $wpdb->posts.post_status = 'publish' and year($wpdb->posts.post_date) = $current_year 
+			GROUP BY month($wpdb->posts.post_date)";
+	}
 
+	$results = $wpdb->get_col($query);
+
+	// $posts = $wp_query->get_posts();
 	// If we don't have posts for this month, reset the month so we can find a month that does.
-	$posts = $wp_query->get_posts();
-	if( empty($posts) )
-		$current_month = 0;
-	if( $current_month == 0 )
-		$current_month = ioya_get_recent_month_with_posts($current_year, $current_month, $results); // pass $results to not duplicate query
+	// if( empty($posts) )
+	// 	$current_month = 0;
+	// if( $current_month == 0 )
+	if( !in_array( intval($current_month), $results) )
+		$current_month = ioya_get_recent_month_with_posts($current_year, $current_month, $results, $cats); // pass $results to not duplicate query, $cats if we're doing category filtering
 
 	$month_has_posts = array();
 	$month_count = ($current_month) ? $current_month - 1 : 0;
@@ -383,14 +412,14 @@ function ioya_update_year($current_year=false, $current_month=false, $cats=false
 	</div>
 
 <?php if( !$ajax ) : ?>
-<script type="text/javascript">var in_over_your_settings = { year: <?php echo esc_js($current_year) ?>, month: <?php echo esc_js($current_month) ?> };</script>
+<script type="text/javascript">var in_over_your_settings = { year: <?php echo esc_js($current_year) ?>, month: <?php echo esc_js($current_month) ?><? if($cats) { ?>, cat:'<?php echo $cats ?>'<? } ?>};</script>
 <?php endif;
 
 }
 
 function ioya_update_month($current_year=false, $current_month=false, $cats=false) {
 
-	global $wp_query;
+	// global $wp_query;
 
 	if ( !$current_year )
 		$current_year = ioya_get_queried_year();
@@ -398,36 +427,42 @@ function ioya_update_month($current_year=false, $current_month=false, $cats=fals
 	if ( !$current_month )
 		$current_month = ioya_get_queried_month();
 
-	// Grab a list of the posts for this month
-	$posts =  $wp_query->get_posts( array(
+	// generate our query
+	$args = array(
+		'year' => $current_year,
+		'monthnum' => $current_month,
 		'posts_per_page' => -1,
-		'cat' => $cats,
-		'showposts' => -1
-	) );
+		'showposts' => -1,
+		'cat' => $cats
+	);
+
+	// Grab a list of the posts for this month
+	$posts = query_posts( $args );
 
 	if( empty($posts) ) {
-		$current_month = ioya_get_recent_month_with_posts($current_year, $current_month);
-		$wp_query = new WP_Query( array(
+		$current_month = ioya_get_recent_month_with_posts($current_year, $current_month, false, $cats);
+		query_posts( array(
 			'year' => $current_year
 			, 'monthnum' => $current_month
 			, 'posts_per_page' => -1
-			, 'showposts' => -1			
+			, 'showposts' => -1	
+			, 'cat' => $cats
 		) );
-		$posts =  $wp_query->get_posts();
 	}
 
-	// Allow users to add custom month template in their theme
-	$template = locate_template( 'ioya_month.php' );
+
 ?>
   	<div id="inoveryourmonth_<?php echo esc_attr($current_year) . esc_attr(ioya_format_month($current_month)); ?>" class="inoveryourpostswrapper inoveryourmonth">
 <?php
+		// Allow users to add custom month template in their theme
+		$template = locate_template( 'ioya_month.php' );
 		if( $template ) {
 			require_once( $template );
 		} else {
 			require_once( 'ioya_month.php' );
 		}
 ?>
-  </div>
+	</div>
 <?php
 }
 
@@ -438,24 +473,11 @@ function ioya_shortcode($attr) {
 	// Save a temp copy of the original query
 	$tmp_query = $wp_query;
 
-	// Get the year and month vars
-	$year = ioya_get_queried_year();
-	$month = ioya_get_queried_month();
-
 	// get category(ies) if user has supplied them
-	extract(shortcode_atts($attr));
-
-	// Create the new query
-	$wp_query = new WP_Query( array(
-		'year' => $year
-		, 'monthnum' => $month
-		, 'posts_per_page' => -1
-		, 'showposts' => -1
-		
-	) );
+	extract(shortcode_atts(array('cat'=>''), $attr));
 
 	// Show the archive
-	ioya_archive($year, $month, $attr, true);
+	ioya_archive(false, false, $attr, true);
 
 	// Revert back to the original query
 	$wp_query = $tmp_query;
@@ -473,10 +495,16 @@ function ioya_month_string($monthnum) {
  * @param $month
  * @param $load_scripts is used for shortcode pages to load necessary CSS and JS
  */
-function ioya_archive( $year=false, $month=false, $cat=false, $load_scripts=false ) {
+function ioya_archive( $year=false, $month=false, $attr=false, $load_scripts=false ) {
 
-	$cats = $cat['cat'];
-	// $cats = explode(',', $cat['cat']);
+	$catIDs = false;
+	if ( !empty($attr['cat']) ) {
+		$cats = explode(',', $attr['cat']);
+		foreach ($cats as $cat){
+			$catIDs[] = (is_int($cat)) ? $cat : get_cat_ID(trim($cat));
+		}
+		$catIDs = implode(',', $catIDs);
+	}
 
 	if( $load_scripts ) :
 		// Yes, we know the stylesheet below breaks validation, but stop whining :P This is the best way to do it without loading the stylesheet across all pages. Plus, HTML5 is on our side anyway :)
@@ -487,12 +515,12 @@ function ioya_archive( $year=false, $month=false, $cat=false, $load_scripts=fals
 ?>
 
 	<div id="inoveryourarchives">
-		<?php if($cats) echo '<h3>Categories: '.$cats.'</h3>' ?>
+		<?php // if($cats) echo '<h3>Category: '.$cats.'</h3>' ?>
     	<div id="inoveryouryears">
-    		<?php ioya_update_year($year, $month, $cats); ?>
+    		<?php ioya_update_year($year, $month, $catIDs); ?>
     	</div>
     	<div id="inoveryourmonths">
-    		<?php ioya_update_month($year, $month, $cats); ?>
+    		<?php ioya_update_month($year, $month, $catIDs); ?>
     	</div>
  	</div>
 
@@ -527,7 +555,6 @@ function ioya_archive_ajax() {
 	$month = ioya_get_queried_month();
 
 	$cat = isset($_POST['cat']) ? $_POST['cat'] : false;
-
 
 	if ( $_POST['ioyh'] == 'y' ) 
 		ioya_update_year( $year, $month, $cat, true );
@@ -565,14 +592,39 @@ function ioya_format_month( $month ) {
 	return str_pad($month, 2, "0", STR_PAD_LEFT);
 }
 
-function ioya_get_recent_month_with_posts( $current_year, $current_month, $results = false ) {
+function ioya_get_recent_month_with_posts( $current_year, $current_month, $results=false, $cats=false ) {
 	global $wpdb;
-	
+
 	// Check to see which months for the current year have posts, if we're not already doing the same query
 	if(!$results) {
-		$results = $wpdb->get_col("SELECT month(post_date) as posts FROM {$wpdb->posts} WHERE post_type = 'post' and post_status = 'publish' and year(post_date) = $current_year GROUP BY month(post_date)");
+
+		if($cats) {
+			foreach (explode(',',$cats) as $cat) {
+				$query[] = "
+					( SELECT month(p.post_date) months
+					  FROM $wpdb->term_relationships AS tr
+					  INNER JOIN $wpdb->posts p
+					  INNER JOIN $wpdb->term_taxonomy AS tt ON tr.term_taxonomy_id = tt.term_taxonomy_id
+					  INNER JOIN $wpdb->terms AS t ON tt.term_id = t.term_id
+					  WHERE tt.taxonomy='category' AND t.term_id='{$cat}' and p.ID = tr.object_id
+					    AND p.post_type = 'post' and p.post_status = 'publish' and year(p.post_date) = $current_year 
+					    GROUP BY month(p.post_date)
+					)";
+			}
+			$query = "SELECT * from (".implode(' UNION ', $query).") as s ";
+		} else {
+			$query = "
+				SELECT month(post_date) as months_with_posts 
+				FROM {$wpdb->posts} 
+				WHERE post_type = 'post' and post_status = 'publish' and year(post_date) = $current_year 
+				GROUP BY month(post_date)";
+		}
+
+		$results = $wpdb->get_col($query);
+
 	}
 
+/*
 	$results_count = 0;
 	foreach( $results as $month ) {
 		// If the month isn't set, set it to the latest month with posts
@@ -583,6 +635,11 @@ function ioya_get_recent_month_with_posts( $current_year, $current_month, $resul
 		$results_count++;
 	}
 	return $month_with_posts;
+
+*/
+	// cheap hack. Just get latest month in year w/posts. Not relative to current month
+	sort(&$results);
+	return array_pop( $results );
 }
 
 

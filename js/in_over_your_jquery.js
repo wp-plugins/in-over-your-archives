@@ -5,6 +5,7 @@ var ioya_js_loaded = true;
 	$(document).ready(function() {
 
 		var slider, $ioya_years_container, $ioya_months_container, year, month;
+		var cat = (in_over_your_settings['cat']) ? '&cat='+in_over_your_settings['cat'] : '';
 		
 		year	= parseInt(in_over_your_settings.year);
 		month	= parseInt(in_over_your_settings.month);
@@ -44,7 +45,7 @@ var ioya_js_loaded = true;
 				$.ajax({
 					type: 'POST',
 					url: $link.attr('href'),
-					data: 'ioyh=y',
+					data: 'ioyh=y'+cat,
 					success: function(result){
 						var $result = $(result);
 						$result
@@ -88,11 +89,10 @@ var ioya_js_loaded = true;
 			if ( $ioya_month.length && $ioya_month.data('loaded') == true ) {
 				$ioya_month.fadeIn('fast');
 			} else {
-				var cat = '';
 				$.ajax({
 					type: "POST",
 					url: $link.attr('href'),	// can just pass the entire URL as it is correct
-					data: 'ioyh=m&cat='+cat,
+					data: 'ioyh=m'+cat,
 					success: function(result) {
 						var $result = $(result);
 						$result
@@ -156,10 +156,10 @@ var ioya_js_loaded = true;
 
 		function setUpSlider() {
 			slider = $('<div></div>').appendTo('#inoveryouryears').addClass('slider');		// our sliding thingy
-			slider.width( $('#inoveryourarchives ul li.selected').width() );
-			slider.height( $('#inoveryourarchives ul li.selected').height() );
+			slider.width( $('#inoveryouryears ul li.selected').width() );
+			slider.height( $('#inoveryouryears ul li.selected').height() );
 			
-			var pos = $('#inoveryourarchives ul li.selected').position();
+			var pos = $('#inoveryouryears ul li.selected').position();
 			slider.css({'position':'absolute', 'top':pos.top+'px', 'left':pos.left+'px', 'z-index':1, 'display':'block', 'margin-left':'1px'}); // margin-left to match margin on li's
 			
 			// remove grey hover, use grey slider as hover instead
@@ -167,7 +167,7 @@ var ioya_js_loaded = true;
 				$(this).css('background', 'transparent');
 			});
 			
-			$('#inoveryourarchives ul li a')
+			$('#inoveryouryears ul li a')
 				.live('mouseover', function(){ if ( ! $(this).parent().hasClass('date') ) moveSlider( $(this).parent() ); })
 				.live('mouseout', function(){ if ( ! $(this).parent().hasClass('date') ) moveSlider( $('#inoveryourarchives ul li.selected') ); });
 
