@@ -3,7 +3,7 @@
 Plugin Name: In Over Your Archives
 Plugin URI: http://wordpress.org/extend/plugins/in-over-your-archives/
 Description: This plugin will display your archive page in a nice way, just like on inoveryourhead.net
-Version: 1.4.1
+Version: 1.4.2
 Author: stresslimit
 Author URI: http://stresslimitdesign.com
 
