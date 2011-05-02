@@ -2,7 +2,7 @@
 Contributors: stresslimit, whatch, cvernon, batmoo
 Tags: inoveryourhead, julien smith, archives, archive, posts, jquery
 Requires at least: 2.9.2
-Stable tag: 1.4.1
+Stable tag: 1.4.2
 
 This plugin will display your archive page in a nice way, just like on <a href="http://inoveryourhead.net/archive">inoveryourhead.net</a>.
 
