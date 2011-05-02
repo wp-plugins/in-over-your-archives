@@ -51,9 +51,9 @@ ioya_options(): creates our admin page
 	SETUP AND DO THE STUFF
 	-------------------------------------------------------------*/
 
-define( 'IOYA_VERSION', '1.4.1' );
-define( 'IOYA_PLUGIN_URL', path_join(plugins_url(), 'in-over-your-archives' ) );
-// define( 'IOYA_PLUGIN_URL', path_join( WP_PLUGIN_URL, basename( dirname( __FILE__ ) ).'' ) );
+define( 'IOYA_VERSION', '1.4.2' );
+// define( 'IOYA_PLUGIN_URL', path_join(plugins_url(), 'in-over-your-archives' ) );
+define( 'IOYA_PLUGIN_URL', path_join( WP_PLUGIN_URL, basename( dirname( __FILE__ ) ).'' ) );
 define( 'IOYA_PLUGIN_PATH', dirname( __FILE__ ) );
 define( 'IOYA_OPTIONS_KEY', 'ioya_' );
 define( 'IOYA_THUMBNAIL_FIELD', 'inoveryourthumb' );
