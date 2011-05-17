@@ -3,7 +3,7 @@
 Plugin Name: In Over Your Archives
 Plugin URI: http://wordpress.org/extend/plugins/in-over-your-archives/
 Description: This plugin will display your archive page in a nice way, just like on inoveryourhead.net
-Version: 1.4.2
+Version: 1.4.35px
 Author: stresslimit
 Author URI: http://stresslimitdesign.com
 
@@ -51,7 +51,7 @@ ioya_options(): creates our admin page
 	SETUP AND DO THE STUFF
 	-------------------------------------------------------------*/
 
-define( 'IOYA_VERSION', '1.4.2' );
+define( 'IOYA_VERSION', '1.4.3' );
 // define( 'IOYA_PLUGIN_URL', path_join(plugins_url(), 'in-over-your-archives' ) );
 define( 'IOYA_PLUGIN_URL', path_join( WP_PLUGIN_URL, basename( dirname( __FILE__ ) ).'' ) );
 define( 'IOYA_PLUGIN_PATH', dirname( __FILE__ ) );
@@ -509,7 +509,7 @@ function ioya_archive( $year=false, $month=false, $attr=false, $load_scripts=fal
 	if ( !empty($attr['cat']) ) {
 		$cats = explode(',', $attr['cat']);
 		foreach ($cats as $cat){
-			$catIDs[] = (is_int($cat)) ? $cat : get_cat_ID(trim($cat));
+			$catIDs[] = is_int(intval($cat)) ? $cat : get_cat_ID(trim($cat));
 		}
 		$catIDs = implode(',', $catIDs);
 	}
