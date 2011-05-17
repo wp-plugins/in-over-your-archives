@@ -64,6 +64,9 @@ Then modify as necessary.
 
 == Changelog ==
 
+= 1.4.2 =
+* small bug fixes
+
 = 1.4.1 =
 * implemented shortcode filtering by category.
 * various tweaks and performance improvements
